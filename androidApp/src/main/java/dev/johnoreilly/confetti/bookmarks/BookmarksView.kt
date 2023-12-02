@@ -20,6 +20,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import dev.johnoreilly.confetti.decompose.BookmarksComponent
 import dev.johnoreilly.confetti.decompose.DateSessionsMap
 import dev.johnoreilly.confetti.sessions.SessionItemView
 import dev.johnoreilly.confetti.ui.LoadingView
@@ -32,29 +33,28 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun BookmarksView(
-    pastSessions: DateSessionsMap,
-    upcomingSessions: DateSessionsMap,
     navigateToSession: (id: String) -> Unit,
     onSignIn: () -> Unit,
-    bookmarks: Set<String>,
     addBookmark: (sessionId: String) -> Unit,
     removeBookmark: (sessionId: String) -> Unit,
-    loading: Boolean,
+    uiState: BookmarksComponent.UiState,
     isLoggedIn: Boolean,
 ) {
-    if (loading) {
-        LoadingView()
-    } else {
-        BookmarksContent(
-            pastSessions = pastSessions,
-            upcomingSessions = upcomingSessions,
-            navigateToSession = navigateToSession,
-            bookmarks = bookmarks,
-            addBookmark = addBookmark,
-            removeBookmark = removeBookmark,
-            onSignIn = onSignIn,
-            isLoggedIn = isLoggedIn,
-        )
+    when (uiState) {
+        BookmarksComponent.Error -> {} // not handled yet
+        BookmarksComponent.Loading -> LoadingView()
+        is BookmarksComponent.Success -> {
+            BookmarksContent(
+                pastSessions = uiState.pastSessions,
+                upcomingSessions = uiState.upcomingSessions,
+                navigateToSession = navigateToSession,
+                bookmarks = uiState.bookmarks,
+                addBookmark = addBookmark,
+                removeBookmark = removeBookmark,
+                onSignIn = onSignIn,
+                isLoggedIn = isLoggedIn,
+            )
+        }
     }
 }
 

@@ -5,7 +5,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import dev.johnoreilly.confetti.decompose.BookmarksComponent
 import dev.johnoreilly.confetti.R
 import dev.johnoreilly.confetti.ui.HomeScaffold
@@ -16,18 +16,9 @@ fun BookmarksRoute(
     windowSizeClass: WindowSizeClass,
     topBarActions: @Composable RowScope.() -> Unit,
 ) {
-    val loading by component
-        .loading
-        .collectAsStateWithLifecycle(initialValue = true)
-    val pastSessions by component
-        .pastSessions
-        .collectAsStateWithLifecycle(initialValue = emptyMap())
-    val upcomingSessions by component
-        .upcomingSessions
-        .collectAsStateWithLifecycle(initialValue = emptyMap())
-    val bookmarks by component
-        .bookmarks
-        .collectAsStateWithLifecycle(initialValue = emptySet())
+    val uiState by component
+        .uiState
+        .subscribeAsState()
 
     HomeScaffold(
         title = stringResource(R.string.bookmarks),
@@ -37,12 +28,9 @@ fun BookmarksRoute(
         BookmarksView(
             navigateToSession = component::onSessionClicked,
             onSignIn = component::onSignInClicked,
-            pastSessions = pastSessions,
-            upcomingSessions = upcomingSessions,
-            bookmarks = bookmarks,
             addBookmark = component::addBookmark,
             removeBookmark = component::removeBookmark,
-            loading = loading,
+            uiState = uiState,
             isLoggedIn = component.isLoggedIn,
         )
     }

@@ -2,6 +2,7 @@ package dev.johnoreilly.confetti.decompose
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
+import com.arkivanov.decompose.value.Value
 import dev.johnoreilly.confetti.ConfettiRepository
 import dev.johnoreilly.confetti.auth.User
 import dev.johnoreilly.confetti.fragment.SessionDetails
@@ -18,11 +19,19 @@ import org.koin.core.component.inject
 
 interface BookmarksComponent {
 
+    val uiState: Value<UiState>
+
     val isLoggedIn: Boolean
-    val loading: Flow<Boolean>
-    val bookmarks: Flow<Set<String>>
-    val pastSessions: Flow<Map<LocalDateTime, List<SessionDetails>>>
-    val upcomingSessions: Flow<Map<LocalDateTime, List<SessionDetails>>>
+
+    sealed interface UiState
+    data object Loading : UiState
+
+    data object Error : UiState
+    class Success(
+        val bookmarks: Set<String>,
+        val pastSessions: DateSessionsMap,
+        val upcomingSessions: DateSessionsMap
+    ) : UiState
 
     fun addBookmark(sessionId: String)
     fun removeBookmark(sessionId: String)
@@ -49,18 +58,14 @@ class DefaultBookmarksComponent(
             user = user,
         )
 
-    override val isLoggedIn: Boolean = user != null
-
-    override val loading: Flow<Boolean> = sessionsComponent
-        .uiState
-        .map { state -> state is SessionsUiState.Loading }
-
     private val loadedSessions = sessionsComponent
         .uiState
         .filterIsInstance<SessionsUiState.Success>()
 
-    override val bookmarks: Flow<Set<String>> = loadedSessions
-        .map { state -> state.bookmarks }
+    private val bookmarks: Flow<Set<String>> = loadedSessions.map { state -> state.bookmarks }
+
+    private val currentDateTimeFlow = dateService
+        .createCurrentLocalDateTimeFlow()
 
     private val sessions = loadedSessions
         .map { state ->
@@ -73,22 +78,40 @@ class DefaultBookmarksComponent(
             sessions.filter { session -> session.id in bookmarks }
         }
 
-    private val currentDateTimeFlow = dateService
-        .createCurrentLocalDateTimeFlow()
+    private val upcomingSessions: Flow<Map<LocalDateTime, List<SessionDetails>>> = sessions
+        .combine(currentDateTimeFlow) { sessions, now ->
+            sessions.filter { session ->
+                session.endsAt >= now
+            }.groupBy { it.startsAt }
+        }
 
-    override val pastSessions: Flow<Map<LocalDateTime, List<SessionDetails>>> = sessions
+    private val pastSessions: Flow<Map<LocalDateTime, List<SessionDetails>>> = sessions
         .combine(currentDateTimeFlow) { sessions, now ->
             sessions.filter { session ->
                 session.endsAt < now
             }.groupBy { it.startsAt }
         }
 
-    override val upcomingSessions: Flow<Map<LocalDateTime, List<SessionDetails>>> = sessions
-        .combine(currentDateTimeFlow) { sessions, now ->
-            sessions.filter { session ->
-                session.endsAt >= now
-            }.groupBy { it.startsAt }
+    override val isLoggedIn: Boolean = user != null
+
+    override val uiState: Value<BookmarksComponent.UiState> = combine(
+        sessionsComponent.uiState,
+        bookmarks,
+        pastSessions,
+        upcomingSessions
+    ) { state, bookmarks, pastSessions, upcomingSessions ->
+        when (state) {
+            SessionsUiState.Loading -> BookmarksComponent.Loading
+            is SessionsUiState.Success ->
+                BookmarksComponent.Success(
+                    bookmarks = bookmarks,
+                    pastSessions = pastSessions,
+                    upcomingSessions = upcomingSessions
+                )
+
+            else -> BookmarksComponent.Error
         }
+    }.asValue(initialValue = BookmarksComponent.Loading, lifecycle = lifecycle)
 
     override fun addBookmark(sessionId: String) {
         coroutineScope.launch {

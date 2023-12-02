@@ -8,17 +8,16 @@ import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.SectionedItemList
 import androidx.car.app.model.Template
-import androidx.lifecycle.lifecycleScope
-import dev.johnoreilly.confetti.decompose.DefaultBookmarksComponent
-import dev.johnoreilly.confetti.car.R
+import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.operator.map
 import dev.johnoreilly.confetti.auth.User
+import dev.johnoreilly.confetti.car.R
 import dev.johnoreilly.confetti.car.sessions.details.SessionDetailsScreen
 import dev.johnoreilly.confetti.car.utils.defaultComponentContext
 import dev.johnoreilly.confetti.car.utils.formatDateTime
+import dev.johnoreilly.confetti.decompose.BookmarksComponent
+import dev.johnoreilly.confetti.decompose.DefaultBookmarksComponent
 import dev.johnoreilly.confetti.fragment.SessionDetails
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDateTime
 import org.koin.core.component.KoinComponent
 
@@ -46,25 +45,31 @@ class BookmarksScreen(
             onSignIn = { /* Unused */ },
         )
 
-    private val bookmarksState = component.upcomingSessions.onEach {
+    private val bookmarksState: Value<BookmarksComponent.UiState> = component.uiState.map {
         invalidate()
-    }.stateIn(lifecycleScope, SharingStarted.Eagerly, null)
+        it
+    }
 
     override fun onGetTemplate(): Template {
-        val bookmarks = bookmarksState.value
 
-        val loading = bookmarks == null
+        val loading = component.uiState.value is BookmarksComponent.Loading
+        return when (val bookmarks = bookmarksState.value) {
+            BookmarksComponent.Error,
+            BookmarksComponent.Loading -> ListTemplate.Builder().setSingleList(ItemList.Builder().build()).build() // not handled yet
 
-        val listBuilder = createBookmarksList(bookmarks)
-        return listBuilder.apply {
-            setTitle(carContext.getString(R.string.bookmarks))
-            setHeaderAction(Action.BACK)
-            setLoading(loading)
+            is BookmarksComponent.Success -> {
+                val listBuilder = createBookmarksList(bookmarks.upcomingSessions)
+                listBuilder.apply {
+                    setTitle(carContext.getString(R.string.bookmarks))
+                    setHeaderAction(Action.BACK)
+                    setLoading(loading)
 
-            if (bookmarks?.isEmpty() == true) {
-                setSingleList(ItemList.Builder().build())
+                    if (bookmarks.upcomingSessions.isEmpty()) {
+                        setSingleList(ItemList.Builder().build())
+                    }
+                }.build()
             }
-        }.build()
+        }
     }
 
     private fun createBookmarksList(bookmarks: Map<LocalDateTime, List<SessionDetails>>?): ListTemplate.Builder {
