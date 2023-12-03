@@ -74,7 +74,7 @@ private struct SessionsContentView: View {
 }
 
 
-private struct SessionView: View {
+struct SessionView: View {
     var session: SessionDetails
     
     var body: some View {

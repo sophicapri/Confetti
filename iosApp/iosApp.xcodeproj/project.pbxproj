@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -37,6 +37,7 @@
 		79BEE2662A11137D00824824 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BEE2652A11137D00824824 /* HomeView.swift */; };
 		79BEE2682A1114EB00824824 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BEE2672A1114EB00824824 /* ConferencesView.swift */; };
 		79BEE26A2A11154D00824824 /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BEE2692A11154D00824824 /* ErrorView.swift */; };
+		E47E41CC2B1B6B740052BF29 /* BookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47E41CB2B1B6B730052BF29 /* BookmarksView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 		79BEE2652A11137D00824824 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		79BEE2672A1114EB00824824 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		79BEE2692A11154D00824824 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		E47E41CB2B1B6B730052BF29 /* BookmarksView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarksView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +215,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				E47E41CA2B1B537A0052BF29 /* Bookmarks */,
 				1AC8AB652AD2997C0067704E /* Venue */,
 				1AF675CA28F1F0F300CC1C26 /* Speakers */,
 				1AF675C928F1F06800CC1C26 /* Sessions */,
@@ -242,6 +245,14 @@
 				1A64E7D12A3DB98500D291F2 /* libsqlite3.0.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E47E41CA2B1B537A0052BF29 /* Bookmarks */ = {
+			isa = PBXGroup;
+			children = (
+				E47E41CB2B1B6B730052BF29 /* BookmarksView.swift */,
+			);
+			path = Bookmarks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -458,6 +469,7 @@
 				1AEAB76E28FDB69F00B06D90 /* SessionSpeakerInfo.swift in Sources */,
 				79062A4A2A0DA4FF00E38089 /* AppDelegate.swift in Sources */,
 				7555FF83242A565900829871 /* ConfettiApp.swift in Sources */,
+				E47E41CC2B1B6B740052BF29 /* BookmarksView.swift in Sources */,
 				79BEE2622A10E97B00824824 /* Utils.swift in Sources */,
 				1AC8AB642AD2993D0067704E /* VenueView.swift in Sources */,
 				79BEE2642A11134600824824 /* ConferenceView.swift in Sources */,

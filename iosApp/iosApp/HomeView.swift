@@ -35,6 +35,13 @@ struct HomeView: View {
                 )
                 
                 BottomTabView(
+                    title: "Bookmarks",
+                    systemImage: "bookmark",
+                    isActive: child is HomeComponentChild.Bookmarks,
+                    action: component.onBookmarksTabClicked
+                )
+                
+                BottomTabView(
                     title: "Venue",
                     systemImage: "location",
                     isActive: child is HomeComponentChild.Venue,
@@ -59,6 +66,7 @@ private struct ChildView: View {
         case let child as HomeComponentChild.Sessions: SessionsView(child.component)
         case let child as HomeComponentChild.MultiPane: MultiPaneView(child.component)
         case let child as HomeComponentChild.Speakers: SpeakersView(child.component)
+        case let child as HomeComponentChild.Bookmarks: BookmarksView(child.component)
         case let child as HomeComponentChild.Venue: VenueView(child.component)
         default: EmptyView()
         }
